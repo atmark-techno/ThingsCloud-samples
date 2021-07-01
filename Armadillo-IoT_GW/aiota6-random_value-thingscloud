@@ -1,0 +1,20 @@
+#!/usr/bin/python3
+from modules.operators.user_led_operator import UserLedOperator
+from modules.reporters.random_reporter import RandomReporter
+from modules.things_cloud.things_cloud import ThingsCloud
+from modules.things_cloud.config import ThingsCloudConfig
+from modules.things_cloud.params import ThingsCloudParams
+ 
+ 
+def main():
+    config = ThingsCloudConfig.from_file('./settings/things_cloud.json')
+    params = ThingsCloudParams.from_file(
+                './settings/parameters/parameter.things_cloud-random_value.json')
+ 
+    ThingsCloud([RandomReporter()],
+                config,
+                params,
+                UserLedOperator('/sys/class/leds/red/'))
+ 
+if __name__ == '__main__':
+    main()

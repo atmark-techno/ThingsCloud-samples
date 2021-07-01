@@ -1,0 +1,37 @@
+{
+    "cloud": {
+        "interval": 600
+    },
+    "temperature": {
+        "interval": 10,
+        "alarms": [
+            {
+                "type": "too_hot",
+                "description": "Temperature is too high",
+                "generate_on": {
+                    "condition": "temperature >= 60",
+                    "hysteresis": "3"
+                },
+                "clear_on": {
+                    "condition": "temperature <= 55",
+                    "hysteresis": "3"
+                }
+            },
+            {
+                "type": "too_cold",
+                "description": "Temperature is too low",
+                "generate_on": {
+                    "condition": "temperature <= 10",
+                    "hysteresis": "3"
+                },
+                "clear_on": {
+                    "condition": "temperature >= 20",
+                    "hysteresis": "3"
+                }
+            }
+        ]
+    },
+    "signal_quality": {
+        "interval": 120
+    }
+}

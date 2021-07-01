@@ -1,0 +1,92 @@
+import asyncio
+from queue import PriorityQueue
+from queue import Queue
+from time import time
+from modules.const import Const
+from modules.lib.loopable import Loopable
+
+
+class ReporterManager(Loopable):
+    def __append(self, reporter):
+        index = len(self.__reporters)
+        self.__reporters.append(reporter)
+        return index
+
+    def listen_to(self, reporter):
+        index = self.__append(reporter)
+        report_at = int(time()) + reporter.interval
+        self.__put(report_at, index)
+
+    def add_nop(self, reporter):
+        index = self.__append(reporter)
+        self.__put_nop(index)
+
+    def __reporter(self, index):
+        return self.__reporters[index]
+
+    def __put(self, report_at, index):
+        self.__reporter_queue.put((report_at, index))
+
+    def __get(self):
+        return self.__reporter_queue.get()
+
+    def __empty(self):
+        return self.__reporter_queue.empty()
+
+    def __put_nop(self, index):
+        self.__reporter_nop_queue.put_nowait(index)
+
+    def __get_nop(self):
+        return self.__reporter_nop_queue.get_nowait()
+
+    def __empty_nop(self):
+        return self.__reporter_nop_queue.empty()
+
+    def __size_nop(self):
+        return self.__reporter_nop_queue.qsize()
+
+    def __check_nop_queue(self):
+        if self.__empty_nop():
+            return
+
+        nop_size = self.__size_nop()
+        for i in range(nop_size):
+            index = self.__get_nop()
+            reporter = self.__reporter(index)
+            if reporter.interval > 0:
+                report_at = int(time()) + reporter.interval
+                self.__put(report_at, index)
+            else:
+                self.__put_nop(index)
+
+    async def routine(self):
+        self.__check_nop_queue()
+        now = int(time())
+        while not self.__empty():
+            (report_at, index) = self.__get()
+            reporter = self.__reporter(index)
+
+            if reporter.interval <= 0:
+                self.__put_nop(index)
+                if self.__empty():
+                    await asyncio.sleep(Const.SLEEP_NO_REPORT_SEC)
+                continue
+
+            if report_at >= now:
+                self.__put(report_at, index)
+                break
+
+            report, alarm = reporter.report_with_alarm()
+            self.__report_queue.push(report)
+            if alarm is not None:
+                self.__alarm_queue.push(alarm)
+
+            self.__put(report_at + reporter.interval, index)
+
+    def __init__(self, report_queue, alarm_queue):
+        self.__reporter_queue = PriorityQueue()
+        self.__reporter_nop_queue = Queue()
+        self.__report_queue = report_queue
+        self.__reporters = []
+        self.__alarm_queue = alarm_queue
+        super().__init__(1)

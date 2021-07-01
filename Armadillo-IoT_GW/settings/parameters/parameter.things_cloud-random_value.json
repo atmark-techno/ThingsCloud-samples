@@ -1,0 +1,22 @@
+{
+    "cloud": {
+        "interval": 30
+    },
+    "random": {
+        "interval": 5,
+        "alarms": [
+            {
+                "type": "unlucky",
+                "description": "You are a unlucky person.",
+                "generate_on": {
+                    "condition": "value <= 30",
+                    "hysteresis": "3"
+                },
+                "clear_on": {
+                    "condition": "value >= 80",
+                    "hysteresis": "1"
+                }
+            }
+        ]
+    }
+}

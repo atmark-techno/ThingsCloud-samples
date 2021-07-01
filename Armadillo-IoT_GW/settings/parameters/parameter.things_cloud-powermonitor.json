@@ -1,0 +1,22 @@
+{
+    "cloud": {
+        "interval":20 
+    },
+    "wattage": {
+        "interval": 10,
+        "alarms": [
+            {
+                "type": "power_outage",
+                "description": "OUTAGE",
+                "generate_on": {
+                    "condition": "value == 0",
+                    "hysteresis": "3"
+                },
+                "clear_on": {
+                    "condition": "value == 0",
+                    "hysteresis": "3"
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,24 @@
+{
+    "aws" : {
+        "interval" : 3600
+    },
+    "wattage" {
+        "interval": 60,
+        "modbus" : {
+            "port" : "/dev/ttymxc0",
+            "baudrate" : 9600,
+            "parity" : "E",
+            "unit" : 1,
+            "waittime" : 20
+        },
+        "alarms": [
+            {
+                "type": "too_high",
+                "description": "wattage too high.",
+                "generate_on": {
+                    "condition": "wattage >= 7"
+                }
+            }
+        ]
+    }
+}
